@@ -1,0 +1,110 @@
+package io.revon.app.ui
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import io.revon.app.ui.navigation.AppNavHost
+import io.revon.app.ui.navigation.NavRoutes
+import io.revon.app.ui.theme.DarkBackground
+import io.revon.app.ui.theme.DarkSurface
+import io.revon.app.ui.theme.RedPrimary
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // 原版網頁 Layout 規範：僅在非競速 Race 頁面顯示底部 4 個導航欄 (路線, 排行, 車隊, 個人)
+    val showBottomBar = currentRoute in listOf(
+        NavRoutes.ROUTES,
+        NavRoutes.RANKING,
+        NavRoutes.CLUB_LIST,
+        NavRoutes.CLUB_DETAIL,
+        NavRoutes.PROFILE
+    )
+
+    Scaffold(
+        containerColor = DarkBackground,
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = DarkSurface,
+                    contentColor = Color.White,
+                    tonalElevation = 8.dp
+                ) {
+                    // 1. 路線 (Routes)
+                    NavigationBarItem(
+                        selected = currentRoute == NavRoutes.ROUTES,
+                        onClick = { navController.navigate(NavRoutes.ROUTES) },
+                        icon = { Icon(Icons.Default.Explore, contentDescription = "路線") },
+                        label = { Text("路線") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = RedPrimary,
+                            selectedTextColor = RedPrimary,
+                            indicatorColor = RedPrimary.copy(alpha = 0.15f)
+                        )
+                    )
+
+                    // 2. 排行 (Ranking)
+                    NavigationBarItem(
+                        selected = currentRoute == NavRoutes.RANKING,
+                        onClick = { navController.navigate(NavRoutes.RANKING) },
+                        icon = { Icon(Icons.Default.EmojiEvents, contentDescription = "排行") },
+                        label = { Text("排行") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = RedPrimary,
+                            selectedTextColor = RedPrimary,
+                            indicatorColor = RedPrimary.copy(alpha = 0.15f)
+                        )
+                    )
+
+                    // 3. 車隊 (Club)
+                    NavigationBarItem(
+                        selected = currentRoute == NavRoutes.CLUB_LIST || currentRoute == NavRoutes.CLUB_DETAIL,
+                        onClick = { navController.navigate(NavRoutes.CLUB_LIST) },
+                        icon = { Icon(Icons.Default.Group, contentDescription = "車隊") },
+                        label = { Text("車隊") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = RedPrimary,
+                            selectedTextColor = RedPrimary,
+                            indicatorColor = RedPrimary.copy(alpha = 0.15f)
+                        )
+                    )
+
+                    // 4. 個人 (Profile)
+                    NavigationBarItem(
+                        selected = currentRoute == NavRoutes.PROFILE,
+                        onClick = { navController.navigate(NavRoutes.PROFILE) },
+                        icon = { Icon(Icons.Default.Person, contentDescription = "個人") },
+                        label = { Text("個人") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = RedPrimary,
+                            selectedTextColor = RedPrimary,
+                            indicatorColor = RedPrimary.copy(alpha = 0.15f)
+                        )
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = DarkBackground
+        ) {
+            AppNavHost(navController = navController)
+        }
+    }
+}

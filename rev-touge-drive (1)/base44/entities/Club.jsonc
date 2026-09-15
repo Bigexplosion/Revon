@@ -1,0 +1,57 @@
+{
+  "name": "Club",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "badge_letters": {
+      "type": "string"
+    },
+    "badge_image": {
+      "type": "string"
+    },
+    "header_image": {
+      "type": "string"
+    },
+    "motto": {
+      "type": "string"
+    },
+    "member_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "max_members": {
+      "type": "integer",
+      "default": 50
+    },
+    "club_record_track_code": {
+      "type": "string"
+    },
+    "club_record_time_display": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "captain_nickname": {
+      "type": "string"
+    },
+    "total_points": {
+      "type": "integer",
+      "default": 0
+    },
+    "level": {
+      "type": "integer",
+      "default": 1
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#E10600"
+    }
+  },
+  "required": [
+    "name",
+    "badge_letters"
+  ]
+}

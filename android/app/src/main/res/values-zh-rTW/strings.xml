@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">revon</string>
+
+    <!-- 通用 (Common) -->
+    <string name="common_ok">確定</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_confirm">確認</string>
+    <string name="common_save">儲存</string>
+    <string name="common_delete">刪除</string>
+    <string name="common_edit">編輯</string>
+    <string name="common_loading">載入中...</string>
+    <string name="common_retry">重試</string>
+    <string name="common_close">關閉</string>
+    <string name="common_search">搜尋</string>
+    <string name="common_back">返回</string>
+    <string name="common_copied">已複製到剪貼簿</string>
+
+    <!-- 主導覽列 (Navigation) -->
+    <string name="nav_home">首頁</string>
+    <string name="nav_rank">排行榜</string>
+    <string name="nav_club">車隊</string>
+    <string name="nav_profile">個人</string>
+
+    <!-- 帳號認證 (Auth) -->
+    <string name="auth_login">登入</string>
+    <string name="auth_register">註冊</string>
+    <string name="auth_account">帳號</string>
+    <string name="auth_password">密碼</string>
+    <string name="auth_logout">登出帳號</string>
+    <string name="auth_login_subtitle">登入以同步您的山道圈速數據與戰績</string>
+    <string name="auth_email">電子信箱 (Email)</string>
+    <string name="auth_forgot_password">忘記密碼？</string>
+    <string name="auth_no_account">還沒有帳號嗎？</string>
+    <string name="auth_register_now">立即註冊</string>
+    <string name="auth_enter_email">請輸入註冊時填寫的 Email</string>
+    <string name="auth_send_code">發送重設驗證碼</string>
+    <string name="auth_enter_code">請輸入驗證碼與新密碼</string>
+
+    <!-- 個人頁面 (Profile) -->
+    <string name="profile_title">個人頁面</string>
+    <string name="profile_nickname">暱稱</string>
+    <string name="profile_account">帳號</string>
+    <string name="profile_user_id">使用者 ID</string>
+    <string name="profile_points">points</string>
+    <string name="profile_total_sessions">總場次</string>
+    <string name="profile_monthly_sessions">本月場次</string>
+    <string name="profile_today_sessions">今日紀錄</string>
+    <string name="profile_all">全部</string>
+    <string name="profile_car">汽車</string>
+    <string name="profile_scooter">機車</string>
+    <string name="profile_my_records">我的最佳成績紀錄</string>
+    <string name="profile_my_stats">我的成績</string>
+    <string name="profile_my_region">我的區域</string>
+    <string name="profile_country">國家</string>
+    <string name="profile_city">城市</string>
+    <string name="profile_no_records">尚無路線測時紀錄</string>
+    <string name="profile_record_count">筆紀錄</string>
+    <string name="profile_record_count_fmt">共 %1$d 筆紀錄</string>
+    <string name="profile_track_detail">賽道紀錄詳情</string>
+    <string name="profile_edit_profile">編輯個人資料</string>
+    <string name="profile_edit_dialog_title">編輯個人資料與安全設定</string>
+    <string name="profile_change_password">修改密碼</string>
+    <string name="profile_avatar_hint">點擊更換/上傳頭像</string>
+    <string name="profile_save_updates">儲存更新</string>
+    <string name="profile_new_password_hint">新密碼(至少6位)</string>
+    <string name="profile_confirm_password_hint">確認新密碼</string>
+    <string name="profile_i_understand">我已瞭解</string>
+    <string name="profile_logout">登出</string>
+    <string name="profile_welcome_back">歡迎回來</string>
+    <string name="profile_change_avatar">更換頭像</string>
+    <string name="profile_sync_data">同步雲端資料</string>
+
+    <!-- 車隊系統 (Club & Social) -->
+    <string name="club_title">車隊榜</string>
+    <string name="club_search_placeholder">搜尋車隊...</string>
+    <string name="club_search_clubs">搜尋車隊</string>
+    <string name="club_my_club">我的車隊</string>
+    <string name="club_browse_all">瀏覽所有車隊</string>
+    <string name="club_create_club">創立車隊</string>
+    <string name="club_create_title">創立全新車隊</string>
+    <string name="club_name">車隊名稱</string>
+    <string name="club_badge">隊徽縮寫 (如 APX)</string>
+    <string name="club_motto">簡介</string>
+    <string name="club_delete_title">刪除車隊</string>
+    <string name="club_delete_confirm">確定要刪除該車隊嗎？此操作不可逆。</string>
+    <string name="club_tab_members">成員管理</string>
+    <string name="club_tab_chat">聊天室</string>
+    <string name="club_tab_settings">車隊設定</string>
+    <string name="club_tab_events">活動建立</string>
+    <string name="club_captain">隊長</string>
+    <string name="club_member">隊員</string>
+    <string name="club_members_count">%1$d 會員</string>
+    <string name="club_invite_member">邀請隊員</string>
+    <string name="club_join_date">加入時間</string>
+    <string name="club_captain_join_date">隊長加入時間</string>
+    <string name="club_accent_color">車隊代表色</string>
+    <string name="club_chat_input_placeholder">輸入隊伍訊息...</string>
+    <string name="club_send">傳送</string>
+    <string name="club_delete_msg_title">收回 / 刪除訊息</string>
+    <string name="club_delete_msg_confirm">確定要刪除這筆訊息嗎？所有人聊天室將同步移除該訊息。</string>
+    <string name="club_event_title">車隊賽事與聚會活動</string>
+    <string name="club_create_event">建立活動</string>
+    <string name="club_cancel_event">取消活動</string>
+    <string name="club_join_event">立即參加</string>
+    <string name="club_joined_event">已報名 (取消)</string>
+    <string name="club_no_events">目前尚未舉辦車隊活動</string>
+    <string name="club_settings_title">車隊設定與資料修改</string>
+    <string name="club_settings_save">儲存車隊設定</string>
+    <string name="club_settings_saved_success">✓ 車隊設定已成功儲存並同步全站</string>
+    <string name="club_settings_captain_only">（僅隊長權限可編輯車隊設定）</string>
+
+    <!-- 排行榜與賽道 (Rankings & Tracks) -->
+    <string name="rank_title">競速排行榜</string>
+    <string name="rank_tab_track">路線榜</string>
+    <string name="rank_tab_club">車隊榜</string>
+    <string name="rank_tab_all">全部</string>
+    <string name="rank_tab_monthly">本月</string>
+    <string name="rank_your_rank">你的排名</string>
+    <string name="rank_personal_best">個人最佳</string>
+    <string name="rank_view_my_records">查看我的成績</string>
+    <string name="rank_unranked">未上榜</string>
+    <string name="rank_no_records">尚無紀錄</string>
+    <string name="rank_no_track_records">目前 %1$s 尚無賽道紀錄</string>
+    <string name="rank_time">時速</string>
+    <string name="rank_lean_angle">傾角</string>
+    <string name="rank_lat_g">側向G值</string>
+    <string name="rank_long_g">縱向G力</string>
+    <string name="track_custom_title">自訂賽道</string>
+    <string name="track_pending_approval">待審核自訂賽道</string>
+    <string name="track_upload_custom">上傳自訂賽道</string>
+    <string name="track_start_point">起點</string>
+    <string name="track_end_point">終點</string>
+    <string name="track_distance">全長</string>
+    <string name="track_completion_progress">路線完跑進度</string>
+    <string name="track_racing">⚡ 比賽中</string>
+
+    <!-- 測時錄製與紀錄回放 (Race Recording & Telemetry) -->
+    <string name="race_session_detail">紀錄回顧詳情</string>
+    <string name="race_playback_speed">時速</string>
+    <string name="race_lean_angle">傾角</string>
+    <string name="race_lat_g">側向G值</string>
+    <string name="race_long_g">縱向 G 力</string>
+    <string name="race_session_not_found">找不到競速紀錄</string>
+    <string name="race_playback_speed_multiplier">回放倍速</string>
+    <string name="race_start_timing">開始測時</string>
+    <string name="race_stop_timing">結束測時</string>
+    <string name="race_waiting_gps">等待 GPS 定位中...</string>
+    <string name="race_best_lap">最佳圈速</string>
+    <string name="race_current_lap">當前圈速</string>
+    <string name="race_lap_count">圈數</string>
+    <string name="race_local_record">本地紀錄</string>
+    <string name="race_routes">路線</string>
+    <string name="race_racing">競速</string>
+    <string name="race_in_race">競速中</string>
+    <string name="race_record_btn">錄製</string>
+</resources>

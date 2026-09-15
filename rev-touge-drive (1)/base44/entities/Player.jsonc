@@ -1,0 +1,36 @@
+{
+  "name": "Player",
+  "type": "object",
+  "properties": {
+    "nickname": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "string"
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "titles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "selected_title": {
+      "type": "string"
+    },
+    "display_badge": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nickname"
+  ]
+}

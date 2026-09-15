@@ -1,0 +1,35 @@
+{
+  "name": "ClubMember",
+  "type": "object",
+  "properties": {
+    "club_id": {
+      "type": "string"
+    },
+    "club_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "joined",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "member_nickname": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "member"
+      ],
+      "default": "member"
+    }
+  },
+  "required": [
+    "club_id",
+    "status"
+  ]
+}

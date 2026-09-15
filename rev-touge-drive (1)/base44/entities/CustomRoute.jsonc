@@ -1,0 +1,50 @@
+{
+  "name": "CustomRoute",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "waypoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "club_id": {
+      "type": "string"
+    },
+    "club_name": {
+      "type": "string"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "NORMAL",
+        "HARD",
+        "EXTREME"
+      ],
+      "default": "NORMAL"
+    },
+    "distance_km": {
+      "type": "number"
+    },
+    "corners_count": {
+      "type": "integer"
+    },
+    "cover_image": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

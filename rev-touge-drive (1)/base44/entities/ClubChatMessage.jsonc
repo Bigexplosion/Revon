@@ -1,0 +1,28 @@
+{
+  "name": "ClubChatMessage",
+  "type": "object",
+  "properties": {
+    "club_id": {
+      "type": "string"
+    },
+    "author_nickname": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "race_report"
+      ],
+      "default": "text"
+    }
+  },
+  "required": [
+    "club_id",
+    "author_nickname",
+    "body"
+  ]
+}

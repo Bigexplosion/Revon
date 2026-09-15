@@ -1,0 +1,63 @@
+{
+  "name": "ClubEvent",
+  "type": "object",
+  "properties": {
+    "club_id": {
+      "type": "string"
+    },
+    "club_name": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "track_code": {
+      "type": "string"
+    },
+    "track_name": {
+      "type": "string"
+    },
+    "start_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reward_title": {
+      "type": "string"
+    },
+    "reward_points": {
+      "type": "integer",
+      "default": 0
+    },
+    "placement_rewards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "place": {
+            "type": "integer"
+          },
+          "points": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "created_by_nickname": {
+      "type": "string"
+    },
+    "finalized": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "club_id",
+    "name",
+    "start_at",
+    "end_at"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "name_zh": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "NORMAL",
+        "HARD",
+        "EXTREME"
+      ]
+    },
+    "distance_km": {
+      "type": "number"
+    },
+    "corners_count": {
+      "type": "integer"
+    },
+    "start_lat": {
+      "type": "number"
+    },
+    "start_lng": {
+      "type": "number"
+    },
+    "end_lat": {
+      "type": "number"
+    },
+    "end_lng": {
+      "type": "number"
+    },
+    "cover_image": {
+      "type": "string"
+    },
+    "active_drivers": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "code",
+    "name",
+    "region",
+    "difficulty"
+  ],
+  "name": "Track"
+}

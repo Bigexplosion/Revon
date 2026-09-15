@@ -1,0 +1,71 @@
+{
+  "name": "RaceResult",
+  "type": "object",
+  "properties": {
+    "track_code": {
+      "type": "string"
+    },
+    "track_name": {
+      "type": "string"
+    },
+    "player_nickname": {
+      "type": "string"
+    },
+    "vehicle_type": {
+      "type": "string",
+      "enum": [
+        "CAR",
+        "MOTOR",
+        "OTHER"
+      ]
+    },
+    "finish_time_ms": {
+      "type": "number"
+    },
+    "finish_time_display": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "region": {
+      "type": "string"
+    },
+    "club_id": {
+      "type": "string"
+    },
+    "club_name": {
+      "type": "string"
+    },
+    "is_custom_route": {
+      "type": "boolean",
+      "default": false
+    },
+    "custom_route_id": {
+      "type": "string"
+    },
+    "custom_route_name": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "club_event_id": {
+      "type": "string"
+    },
+    "splits": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "track_code",
+    "player_nickname",
+    "vehicle_type",
+    "finish_time_ms",
+    "finish_time_display"
+  ]
+}

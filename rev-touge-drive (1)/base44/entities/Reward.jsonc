@@ -1,0 +1,37 @@
+{
+  "name": "Reward",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string"
+    },
+    "points_cost": {
+      "type": "integer",
+      "default": 0
+    },
+    "stock": {
+      "type": "integer",
+      "default": 0
+    },
+    "region_country": {
+      "type": "string"
+    },
+    "region_city": {
+      "type": "string"
+    },
+    "distributor_id": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "points_cost"
+  ]
+}

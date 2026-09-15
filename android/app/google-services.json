@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "123655068235",
+    "project_id": "revon-tw",
+    "storage_bucket": "revon-tw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123655068235:android:51a57a61a8ca78977c8bce",
+        "android_client_info": {
+          "package_name": "io.revon.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJFJl21wOm7nGxxjkURROVQxO2eQkRxds"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

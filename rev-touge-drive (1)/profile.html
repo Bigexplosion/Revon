@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REV-ON Touge Drive - 個人</title>
+  <!-- Google Fonts: Inter & Outfit & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-black: #0A0A0C;
+      --card-bg: #121215;
+      --card-border: #222228;
+      --red-primary: #E50914;
+      --red-glow: rgba(229, 9, 20, 0.4);
+      --green-glow: #00FF66;
+      --text-white: #FFFFFF;
+      --text-gray: #888894;
+      --text-sub: #AAAA88;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-black);
+      color: var(--text-white);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: var(--bg-black);
+      border-left: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 70px;
+    }
+
+    /* Top Marquee Banner with strict bounds */
+    .top-marquee {
+      background: #000000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      overflow: hidden;
+    }
+    
+    /* Fixed left status label (Will NOT be overlapped) */
+    .live-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 10px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFF;
+      flex-shrink: 0;
+      width: max-content;
+      background: #000000;
+      z-index: 10;
+      position: relative;
+      height: 100%;
+      white-space: nowrap;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green-glow);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--green-glow);
+    }
+    .live-val { color: var(--green-glow); font-family: 'JetBrains Mono', monospace; }
+    
+    /* Strictly constrained marquee scrolling container */
+    .marquee-container {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      mask-image: linear-gradient(to right, transparent 0%, black 10px, black 90%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10px, black 90%, transparent 100%);
+    }
+
+    .marquee-content {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      white-space: nowrap;
+      padding-left: 20px;
+      animation: marquee 20s linear infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-gray);
+    }
+    .marquee-red { color: var(--red-primary); font-weight: 800; }
+    .marquee-green { color: var(--green-glow); font-weight: 800; }
+
+    /* Header Profile Block */
+    .profile-header {
+      padding: 24px 20px 16px 20px;
+      background: radial-gradient(circle at 10% 20%, rgba(229, 9, 20, 0.08) 0%, transparent 50%), var(--bg-black);
+      border-bottom: 1px solid var(--card-border);
+    }
+    .profile-top-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .avatar-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--red-primary);
+      background: #16161B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #FFF;
+      box-shadow: 0 0 18px var(--red-glow);
+      flex-shrink: 0;
+    }
+
+    .welcome-text {
+      font-size: 11px;
+      color: var(--red-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .username-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #FFF;
+      text-transform: uppercase;
+    }
+
+    .points-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .points-label {
+      font-size: 12px;
+      color: var(--text-gray);
+    }
+    .points-pill {
+      background: rgba(0, 255, 102, 0.12);
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      color: var(--green-glow);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 2px 10px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+    }
+
+    .subscribe-btn {
+      margin-top: 16px;
+      width: 140px;
+      height: 38px;
+      background: var(--red-primary);
+      color: #FFF;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--red-glow);
+      transition: opacity 0.2s;
+    }
+    .subscribe-btn:hover { opacity: 0.9; }
+
+    /* Section Container */
+    .section-block {
+      padding: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--red-primary);
+      margin-bottom: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 3-Stat Cards */
+    .stat-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stat-icon-svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--red-primary);
+      fill: none;
+      stroke-width: 2;
+      margin-bottom: 6px;
+    }
+    .stat-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #FFF;
+    }
+    .stat-desc {
+      font-size: 10px;
+      color: var(--text-gray);
+      margin-top: 2px;
+    }
+
+    /* Select Filter Dropdown */
+    .filter-select {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: #FFF;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      outline: none;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    /* Record Items List */
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .record-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .record-item:hover {
+      border-color: rgba(229, 9, 20, 0.5);
+    }
+    .record-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: 0.5px;
+    }
+    .record-date {
+      font-size: 11px;
+      color: var(--text-gray);
+      margin-top: 2px;
+    }
+    .record-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--green-glow);
+    }
+
+    /* Form & Input Elements */
+    .promo-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .input-dark {
+      flex: 1;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0 12px;
+      color: #FFF;
+      font-size: 13px;
+      outline: none;
+    }
+    .input-dark:focus {
+      border-color: var(--red-primary);
+    }
+    .btn-red {
+      height: 40px;
+      padding: 0 18px;
+      background: var(--red-primary);
+      color: #FFF;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Goods Grid */
+    .goods-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .goods-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    .goods-img-box {
+      width: 100%;
+      height: 120px;
+      background: #08080A;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .goods-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: 0.5px;
+    }
+    .goods-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--green-glow);
+      margin-top: 4px;
+    }
+    .goods-price span {
+      font-size: 10px;
+      color: var(--text-gray);
+      font-weight: 400;
+    }
+    .btn-goods-buy {
+      margin-top: 8px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: #FFF;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-goods-buy:hover {
+      background: var(--red-primary);
+      border-color: var(--red-primary);
+    }
+
+    /* Trophy Grid */
+    .trophy-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .trophy-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+    }
+    .trophy-lock-svg {
+      width: 20px;
+      height: 20px;
+      stroke: #444450;
+      fill: none;
+      stroke-width: 2;
+      margin-bottom: 6px;
+    }
+    .trophy-name {
+      font-size: 9px;
+      font-weight: 700;
+      color: #555566;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .title-select-tag {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--red-primary);
+      color: #FFF;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    /* Menu Rows */
+    .menu-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+    .menu-row:last-child { border-bottom: none; }
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #FFF;
+    }
+    .menu-icon-svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-gray);
+      fill: none;
+      stroke-width: 2;
+    }
+    .chevron-svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text-gray);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* Select Inputs */
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-label {
+      font-size: 10px;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .form-select {
+      width: 100%;
+      height: 42px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: #FFF;
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-save-full {
+      width: 100%;
+      height: 44px;
+      background: var(--red-primary);
+      color: #FFF;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--red-glow);
+      margin-top: 6px;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: var(--red-primary);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+    }
+    .toggle-circle {
+      width: 20px;
+      height: 20px;
+      background: #FFF;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      transition: right 0.2s;
+    }
+
+    .lang-switcher {
+      display: flex;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .lang-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      border: none;
+      background: transparent;
+      color: var(--text-gray);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .lang-btn.active {
+      background: var(--red-primary);
+      color: #FFF;
+    }
+
+    /* Red Outlined Logout Button */
+    .logout-container {
+      padding: 24px 20px;
+    }
+    .btn-logout-outlined {
+      width: 100%;
+      height: 46px;
+      background: transparent;
+      border: 1px solid var(--red-primary);
+      color: var(--red-primary);
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-logout-outlined:hover {
+      background: rgba(229, 9, 20, 0.1);
+    }
+    .logout-svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--red-primary);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 60px;
+      background: #08080A;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-gray);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .nav-item.active {
+      color: var(--red-primary);
+    }
+    .nav-svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* Modal / Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 120;
+      padding: 20px;
+    }
+    .modal-backdrop.active { display: flex; }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Top Marquee Banner (Strict Bounds) -->
+    <div class="top-marquee">
+      <div class="live-status">
+        <div class="live-dot"></div>
+        <span class="live-val">1,281</span> 競速中
+      </div>
+      <div class="marquee-container">
+        <div class="marquee-content">
+          <div class="marquee-item"><span class="marquee-red">● TAKUMI_86</span> 奪冠 <span class="marquee-green">T21 WEEKLY CHALLENGE</span></div>
+          <div class="marquee-item"><span class="marquee-red">● RYOSUKE</span> 奪冠 <span class="marquee-green">T3 SPRING CUP</span></div>
+          <div class="marquee-item"><span class="marquee-red">● SHUO CHIAN</span> 刷新 <span class="marquee-green">136 縣道最速紀錄</span></div>
+          <!-- Repeat for smooth looping -->
+          <div class="marquee-item"><span class="marquee-red">● TAKUMI_86</span> 奪冠 <span class="marquee-green">T21 WEEKLY CHALLENGE</span></div>
+          <div class="marquee-item"><span class="marquee-red">● RYOSUKE</span> 奪冠 <span class="marquee-green">T3 SPRING CUP</span></div>
+          <div class="marquee-item"><span class="marquee-red">● SHUO CHIAN</span> 刷新 <span class="marquee-green">136 縣道最速紀錄</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Header -->
+    <header class="profile-header">
+      <div class="profile-top-row">
+        <div class="avatar-circle">LO</div>
+        <div>
+          <div class="welcome-text">歡迎回來</div>
+          <div class="username-text">LOVE888345</div>
+        </div>
+      </div>
+
+      <div class="points-row">
+        <span class="points-label">R 點數</span>
+        <span class="points-pill" id="r-points-val">0</span>
+      </div>
+
+      <button class="subscribe-btn" onclick="alert('開通 REV-ON VIP 競速通行證')">SUBSCRIBE ›</button>
+    </header>
+
+    <!-- My Racing Section (我的競速) -->
+    <section class="section-block">
+      <div class="section-title">我的競速</div>
+
+      <div class="stat-cards-grid">
+        <div class="stat-card">
+          <svg class="stat-icon-svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+          <div class="stat-number">117</div>
+          <div class="stat-desc">總場次</div>
+        </div>
+        <div class="stat-card">
+          <svg class="stat-icon-svg" viewBox="0 0 24 24"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>
+          <div class="stat-number">—</div>
+          <div class="stat-desc">最佳排名</div>
+        </div>
+        <div class="stat-card">
+          <svg class="stat-icon-svg" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg>
+          <div class="stat-number">T3</div>
+          <div class="stat-desc">最愛路線</div>
+        </div>
+      </div>
+
+      <!-- Select Filter Mode -->
+      <select class="filter-select" id="sort-select" onchange="sortRecords()">
+        <option value="date">By Date (最新完成紀錄降序)</option>
+        <option value="track">By Track (依賽道名稱)</option>
+      </select>
+
+      <!-- Record Items List (Sorted by Date) -->
+      <div class="record-list" id="record-container">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- Redeem Section (獎勵) -->
+    <section class="section-block">
+      <div class="section-title">獎勵</div>
+      <div class="promo-row">
+        <input type="text" class="input-dark" id="promo-input" placeholder="優惠代碼">
+        <button class="btn-red" onclick="redeemCode()">兌換</button>
+      </div>
+    </section>
+
+    <!-- Merchandise (美熱商品) -->
+    <section class="section-block">
+      <div class="section-title">美熱商品</div>
+      <div class="goods-grid">
+        <div class="goods-card">
+          <div class="goods-img-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444450" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          </div>
+          <div class="goods-title">REV-ON CAP</div>
+          <div class="goods-price">280 <span>R 點數</span></div>
+          <button class="btn-goods-buy" onclick="buyItem('REV-ON CAP', 280)">需 280</button>
+        </div>
+
+        <div class="goods-card">
+          <div class="goods-img-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444450" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          </div>
+          <div class="goods-title">DRIFT GLOVES</div>
+          <div class="goods-price">150 <span>R 點數</span></div>
+          <button class="btn-goods-buy" onclick="buyItem('DRIFT GLOVES', 150)">需 150</button>
+        </div>
+
+        <div class="goods-card">
+          <div class="goods-img-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444450" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="m10 15 5-3-5-3v6z"></path></svg>
+          </div>
+          <div class="goods-title">AKINA KEYCHAIN</div>
+          <div class="goods-price">120 <span>R 點數</span></div>
+          <button class="btn-goods-buy" onclick="buyItem('AKINA KEYCHAIN', 120)">需 120</button>
+        </div>
+
+        <div class="goods-card">
+          <div class="goods-img-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444450" stroke-width="1.5"><path d="M12 2a10 10 0 0 0-10 10c0 5.523 4.477 10 10 10s10-4.477 10-10A10 10 0 0 0 12 2z"></path></svg>
+          </div>
+          <div class="goods-title">CARBON HELMET</div>
+          <div class="goods-price">500 <span>R 點數</span></div>
+          <button class="btn-goods-buy" onclick="buyItem('CARBON HELMET', 500)">需 500</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trophy Case (獎盃櫃) -->
+    <section class="section-block">
+      <div class="section-title">獎盃櫃</div>
+      <div class="trophy-grid">
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">GOLD</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">SILVER</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">BRONZE</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">T21 KING</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">SEASON CHAMP</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">FASTEST</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">CLUB HERO</div></div>
+        <div class="trophy-box"><svg class="trophy-lock-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><div class="trophy-name">NIGHT RUNNER</div></div>
+      </div>
+
+      <div style="font-size: 11px; color: var(--text-gray); margin-bottom: 6px;">選擇頭銜</div>
+      <div class="title-select-tag">無</div>
+    </section>
+
+    <!-- Account Section (帳號) -->
+    <section class="section-block">
+      <div class="section-title">帳號</div>
+      <div class="menu-row" onclick="openModal('編輯個人資料')">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>編輯個人資料</span>
+        </div>
+        <svg class="chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+
+      <div class="menu-row" onclick="openModal('修改密碼')">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="m21 2-9.6 9.6"></path><path d="m15.5 7.5 3 3"></path></svg>
+          <span>修改密碼</span>
+        </div>
+        <svg class="chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    </section>
+
+    <!-- My Region (我的區域) -->
+    <section class="section-block">
+      <div class="section-title">我的區域</div>
+      <div class="form-group">
+        <label class="form-label">COUNTRY</label>
+        <select class="form-select" id="country-select" onchange="updateCities()">
+          <option value="Taiwan">Taiwan</option>
+          <option value="Japan">Japan</option>
+          <option value="United States">United States</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CITY</label>
+        <select class="form-select" id="city-select">
+          <option value="Taichung">Taichung</option>
+          <option value="Taipei">Taipei</option>
+          <option value="Kaohsiung">Kaohsiung</option>
+        </select>
+      </div>
+      <button class="btn-save-full" onclick="alert('區域設定已儲存！')">SAVE</button>
+    </section>
+
+    <!-- App Settings (應用設定) -->
+    <section class="section-block">
+      <div class="section-title">應用設定</div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span>語言</span>
+        </div>
+        <div class="lang-switcher">
+          <button class="lang-btn">EN</button>
+          <button class="lang-btn active">中</button>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M22 10v6M2 10v6"></path><path d="M12 2v20"></path><path d="m17 7 5 5-5 5"></path><path d="m7 7-5 5 5 5"></path></svg>
+          <span>GPS 教學模式</span>
+        </div>
+        <div class="toggle-switch" onclick="toggleTutorial(this)">
+          <div class="toggle-circle"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Support & Legal (支援與法律) -->
+    <section class="section-block">
+      <div class="section-title">支援與法律</div>
+
+      <div class="menu-row" onclick="openModal('隱私權政策')">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>隱私權政策</span>
+        </div>
+        <svg class="chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+
+      <div class="menu-row" onclick="openModal('服務條款')">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>服務條款</span>
+        </div>
+        <svg class="chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+
+      <div class="menu-row" onclick="openModal('退換貨政策')">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>退換貨政策</span>
+        </div>
+        <svg class="chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+
+      <div class="menu-row" onclick="openModal('聯絡客服')">
+        <div class="menu-left">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span>聯絡客服</span>
+        </div>
+        <svg class="chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    </section>
+
+    <!-- Logout Button Container -->
+    <div class="logout-container">
+      <button class="btn-logout-outlined" onclick="alert('已成功登出 REV-ON 賽車帳號')">
+        <svg class="logout-svg" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        登出
+      </button>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item">
+        <svg class="nav-svg" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg>
+        路線
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+        排名
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        車隊
+      </a>
+      <a href="#" class="nav-item active">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        個人
+      </a>
+    </nav>
+  </div>
+
+  <!-- Dialog Modal -->
+  <div class="modal-backdrop" id="dialog-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+      <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; color: #FFF; margin-bottom: 12px;" id="modal-title-text">標題</div>
+      <div style="font-size: 13px; color: var(--text-gray);" id="modal-body-text">內容...</div>
+    </div>
+  </div>
+
+  <script>
+    let rPoints = 0;
+
+    const recordsData = [
+      { trackCode: 'T3 · CAR', date: '2026/8/28', timeDisplay: '03:08.000', timestamp: 1787884800000 },
+      { trackCode: 'T3 · CAR', date: '2026/8/28', timeDisplay: '03:21.000', timestamp: 1787884700000 },
+      { trackCode: 'T21 · MOTOR', date: '2026/8/26', timeDisplay: '05:42.150', timestamp: 1787712000000 },
+      { trackCode: '136 · MOTOR', date: '2026/8/24', timeDisplay: '04:15.820', timestamp: 1787539200000 },
+      { trackCode: '139 · CAR', date: '2026/8/20', timeDisplay: '05:10.500', timestamp: 1787193600000 }
+    ];
+
+    function sortRecords() {
+      const mode = document.getElementById('sort-select').value;
+      const container = document.getElementById('record-container');
+      container.innerHTML = '';
+
+      let list = [...recordsData];
+      if (mode === 'date') {
+        // 最近完成紀錄降序
+        list.sort((a, b) => b.timestamp - a.timestamp);
+      } else {
+        list.sort((a, b) => a.trackCode.localeCompare(b.trackCode));
+      }
+
+      list.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'record-item';
+        item.onclick = () => openModal(r.trackCode, `時間：${r.date}<br>最佳圈速：${r.timeDisplay}`);
+        item.innerHTML = `
+          <div>
+            <div class="record-title">${r.trackCode}</div>
+            <div class="record-date">${r.date}</div>
+          </div>
+          <div class="record-time">${r.timeDisplay}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function redeemCode() {
+      const input = document.getElementById('promo-input');
+      const val = input.value.trim().toUpperCase();
+      if (!val) return;
+      if (val === 'REVON' || val === 'REV2026') {
+        rPoints += 100;
+        document.getElementById('r-points-val').innerText = rPoints;
+        alert(`成功兌換！獲得 100 R 點數`);
+        input.value = '';
+      } else {
+        alert('無效或已過期的優惠代碼');
+      }
+    }
+
+    function buyItem(name, cost) {
+      if (rPoints >= cost) {
+        rPoints -= cost;
+        document.getElementById('r-points-val').innerText = rPoints;
+        alert(`成功兌換商品：${name}`);
+      } else {
+        alert(`R 點數不足！需要 ${cost} R 點數`);
+      }
+    }
+
+    function updateCities() {
+      const country = document.getElementById('country-select').value;
+      const citySelect = document.getElementById('city-select');
+      citySelect.innerHTML = '';
+
+      const citiesMap = {
+        'Taiwan': ['Taichung', 'Taipei', 'Kaohsiung', 'Tainan'],
+        'Japan': ['Tokyo', 'Osaka', 'Nagano', 'Gunma'],
+        'United States': ['Los Angeles', 'San Francisco', 'Seattle']
+      };
+
+      const list = citiesMap[country] || citiesMap['Taiwan'];
+      list.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.innerText = c;
+        citySelect.appendChild(opt);
+      });
+    }
+
+    function toggleTutorial(el) {
+      const circle = el.querySelector('.toggle-circle');
+      if (circle.style.right === '22px') {
+        circle.style.right = '2px';
+        el.style.background = 'var(--red-primary)';
+      } else {
+        circle.style.right = '22px';
+        el.style.background = '#33333F';
+      }
+    }
+
+    function openModal(title, text) {
+      document.getElementById('modal-title-text').innerText = title;
+      document.getElementById('modal-body-text').innerHTML = text || '功能設定與詳細資訊';
+      document.getElementById('dialog-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('dialog-modal').classList.remove('active');
+    }
+
+    // Initialize
+    sortRecords();
+  </script>
+</body>
+</html>

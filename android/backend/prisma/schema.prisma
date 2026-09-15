@@ -1,0 +1,119 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  nickname  String   @unique
+  password  String
+  role      String   @default("user")
+  rPoints   Int      @default(0)
+  region    String?
+  city      String?
+  country   String?
+  clubs     ClubMember[]
+  results   RaceResult[]
+  transactions Transaction[]
+}
+
+model Track {
+  code           String       @id
+  name           String
+  nameZh         String?
+  region         String
+  difficulty     String
+  distanceKm     Float?
+  cornersCount   Int?
+  startLat       Float?
+  startLng       Float?
+  endLat         Float?
+  endLng         Float?
+  coverImage     String?
+  activeDrivers  Int          @default(0)
+  raceResults    RaceResult[]
+}
+
+model RaceResult {
+  id                String   @id @default(uuid())
+  trackCode         String
+  trackName         String?
+  playerNickname    String
+  vehicleType       String
+  finishTimeMs      BigInt
+  finishTimeDisplay String
+  recordedAt        DateTime @default(now())
+  region            String?
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id])
+  track             Track    @relation(fields: [trackCode], references: [code])
+  clubId            String?
+  clubName          String?
+  isCustomRoute     Boolean  @default(false)
+}
+
+model Club {
+  id                    String   @id @default(uuid())
+  name                  String   @unique
+  badgeLetters          String
+  motto                 String?
+  memberCount           Int      @default(0)
+  maxMembers            Int      @default(50)
+  clubRecordTrackCode   String?
+  clubRecordTimeDisplay String?
+  region                String?
+  captainNickname       String?
+  totalPoints           Int      @default(0)
+  level                 Int      @default(1)
+  accentColor           String   @default("#E10600")
+  members               ClubMember[]
+  messages              ClubChatMessage[]
+}
+
+model ClubMember {
+  id             String @id @default(uuid())
+  clubId         String
+  status         String @default("pending")
+  memberNickname String
+  role           String @default("member")
+  userId         String
+  user           User   @relation(fields: [userId], references: [id])
+  club           Club   @relation(fields: [clubId], references: [id])
+}
+
+model ClubChatMessage {
+  id             String   @id @default(uuid())
+  clubId         String
+  club           Club     @relation(fields: [clubId], references: [id])
+  authorNickname String
+  body           String
+  messageType    String   @default("text")
+  createdAt      DateTime @default(now())
+}
+
+model CustomRoute {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  points      Int    @default(0)
+}
+
+model PromoCode {
+  code      String   @id
+  discount  Int
+  expiresAt DateTime
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  type      String
+  createdAt DateTime @default(now())
+}

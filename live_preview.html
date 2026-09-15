@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REVON Real-time Telemetry Live Dashboard | 雲端即時競速預覽儀表板</title>
+  <!-- Google Fonts & Google Maps JS API -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Firebase Compat Libraries -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Google Maps JavaScript API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcIlEGGp-DDakBjGE6ODOK_eNwOZK40mU&libraries=geometry"></script>
+
+  <style>
+    :root {
+      --bg-dark: #090a0f;
+      --panel-bg: rgba(18, 20, 29, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --red-primary: #ff2a55;
+      --neon-green: #00ff66;
+      --cyan-accent: #00e5ff;
+      --yellow-accent: #ffb800;
+      --text-main: #f0f2f8;
+      --text-muted: #8a90a2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styling */
+    header {
+      height: 64px;
+      background: rgba(10, 11, 16, 0.95);
+      border-bottom: 1px solid var(--panel-border);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--red-primary), #d00036);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 0 16px rgba(255, 42, 85, 0.4);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #ffffff, var(--cyan-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tag {
+      font-size: 10px;
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--cyan-accent);
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 255, 102, 0.1);
+      border: 1px solid rgba(0, 255, 102, 0.25);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--neon-green);
+      transition: all 0.3s ease;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 255, 102, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
+    }
+
+    .session-select {
+      background: #181a24;
+      color: #fff;
+      border: 1px solid var(--panel-border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-action {
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--cyan-accent);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(0, 229, 255, 0.3);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+    }
+
+    .app-container {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #map {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background-color: #06070a;
+      z-index: 1;
+    }
+
+    .custom-driver-marker-wrap {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .custom-track-marker-wrap {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .lap-history-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 280px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.7);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .lap-history-header {
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--cyan-accent);
+    }
+
+    .lap-count-tag {
+      font-size: 10px;
+      background: rgba(255, 184, 0, 0.15);
+      color: var(--yellow-accent);
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 184, 0, 0.3);
+    }
+
+    .lap-history-list {
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .lap-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .lap-row.best-lap {
+      background: rgba(0, 255, 102, 0.12);
+      border-color: rgba(0, 255, 102, 0.4);
+    }
+
+    .lap-num {
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .lap-row.best-lap .lap-num {
+      color: var(--neon-green);
+    }
+
+    .lap-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .lap-row.best-lap .lap-time {
+      color: var(--neon-green);
+    }
+
+    .best-badge {
+      font-size: 9px;
+      background: rgba(0, 255, 102, 0.2);
+      color: var(--neon-green);
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-left: 6px;
+      font-weight: 800;
+    }
+
+    .debug-drawer {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 440px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.7);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .debug-drawer-header {
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .debug-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--cyan-accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .debug-content {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .debug-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .debug-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .debug-label {
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .debug-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .log-box {
+      background: #06070a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #00ff66;
+      height: 110px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .dashboard-overlay {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      bottom: 16px;
+      width: 360px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+      gap: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      overflow-y: auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .driver-info-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .driver-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .track-name {
+      font-size: 11px;
+      color: var(--cyan-accent);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .vehicle-pill {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: rgba(255, 42, 85, 0.2);
+      border: 1px solid rgba(255, 42, 85, 0.4);
+      color: var(--red-primary);
+      border-radius: 12px;
+      font-weight: 800;
+    }
+
+    .speed-display-box {
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    .speed-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 58px;
+      font-weight: 800;
+      color: var(--neon-green);
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
+    }
+
+    .speed-unit {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+    }
+
+    .gforce-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gforce-canvas-wrap {
+      width: 130px;
+      height: 130px;
+      position: relative;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas#gforceCanvas {
+      width: 130px;
+      height: 130px;
+    }
+
+    .timer-card {
+      background: linear-gradient(135deg, rgba(255, 42, 85, 0.15), rgba(0, 0, 0, 0.4));
+      border: 1px solid rgba(255, 42, 85, 0.3);
+      text-align: center;
+    }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .lap-badge {
+      font-size: 10px;
+      color: var(--yellow-accent);
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">R</div>
+      <div>
+        <span class="brand-title">REVON</span>
+        <span class="brand-tag">LIVE TELEMETRY</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <button class="btn-action" onclick="testFirebaseConnection()">🔌 立即診斷連線</button>
+      <button class="btn-action" id="simBtn" onclick="runSimulatedRace()">🧪 測試模擬傳送</button>
+
+      <select id="sessionSelector" class="session-select">
+        <option value="">-- 請選擇即時連線賽車 --</option>
+      </select>
+
+      <div class="status-badge" id="statusBadge">
+        <div class="pulse-dot" id="statusDot"></div>
+        <span id="statusText">確認 Firebase 連線中...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    <div id="map"></div>
+
+    <!-- Top-Left LAP History Overlay -->
+    <div class="lap-history-panel" id="lapHistoryPanel" style="display: none;">
+      <div class="lap-history-header">
+        <span>🏁 已紀錄 LAP 圈速榜</span>
+        <span class="lap-count-tag" id="lapCountTag">0 LAPS</span>
+      </div>
+      <div class="lap-history-list" id="lapHistoryList"></div>
+    </div>
+
+    <div class="debug-drawer" id="debugDrawer">
+      <div class="debug-drawer-header" onclick="toggleDebugPanel()">
+        <div class="debug-title">
+          <span>🛠️ 雲端連線診斷與偵錯日誌</span>
+        </div>
+        <span id="toggleIcon" style="color: var(--text-muted); font-size: 11px;">▼ 收合</span>
+      </div>
+
+      <div class="debug-content" id="debugContent">
+        <div class="debug-grid">
+          <div class="debug-item">
+            <div class="debug-label">Firebase 專案 ID</div>
+            <div class="debug-val" id="dbProjId">revon-tw</div>
+          </div>
+          <div class="debug-item">
+            <div class="debug-label">Firestore 集合</div>
+            <div class="debug-val">live_telemetry</div>
+          </div>
+          <div class="debug-item">
+            <div class="debug-label">連線狀態</div>
+            <div class="debug-val" id="dbStateVal" style="color: var(--yellow-accent);">CONNECTING</div>
+          </div>
+          <div class="debug-item">
+            <div class="debug-label">線上賽車筆數</div>
+            <div class="debug-val" id="activeCountVal">0 筆</div>
+          </div>
+        </div>
+
+        <div class="log-box" id="logConsole">-- 系統初始化中 --\n</div>
+      </div>
+    </div>
+
+    <div class="dashboard-overlay">
+      <div class="card driver-info-card">
+        <div>
+          <div class="driver-name" id="driverName">--</div>
+          <div class="track-name" id="trackName">未選擇連線賽車</div>
+        </div>
+        <div class="vehicle-pill" id="vehicleType">CAR</div>
+      </div>
+
+      <div class="card speed-display-box">
+        <div class="speed-number" id="speedDisplay">0</div>
+        <div class="speed-unit">KM / H</div>
+      </div>
+
+      <div class="card timer-card">
+        <div class="lap-badge" id="lapBadge">LAP 1</div>
+        <div class="timer-display" id="timerDisplay">00:00.000</div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <span class="metric-label">當前 G 力</span>
+          <span class="metric-val" id="accelGVal">0.00 G</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-label">軌跡點位數</span>
+          <span class="metric-val" id="pointsCountVal">0</span>
+        </div>
+      </div>
+
+      <div class="card gforce-container">
+        <span class="metric-label">G-Force 實時動態向量 (±2.0G)</span>
+        <div class="gforce-canvas-wrap">
+          <canvas id="gforceCanvas" width="130" height="130"></canvas>
+        </div>
+      </div>
+
+      <div style="font-size: 10px; color: var(--text-muted); text-align: center; margin-top: auto;">
+        最後更新: <span id="lastUpdatedVal">Never</span> | Firebase Realtime Sync
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const logConsole = document.getElementById("logConsole");
+    function appendLog(msg, type = "info") {
+      const now = new Date().toLocaleTimeString();
+      const prefix = type === "error" ? "❌" : type === "success" ? "✅" : "📡";
+      const line = `[${now}] ${prefix} ${msg}\n`;
+      if (logConsole) {
+        logConsole.innerText += line;
+        logConsole.scrollTop = logConsole.scrollHeight;
+      }
+    }
+
+    let isDebugOpen = true;
+    function toggleDebugPanel() {
+      isDebugOpen = !isDebugOpen;
+      const content = document.getElementById("debugContent");
+      const icon = document.getElementById("toggleIcon");
+      if (isDebugOpen) {
+        content.style.display = "flex";
+        icon.innerText = "▼ 收合";
+      } else {
+        content.style.display = "none";
+        icon.innerText = "▲ 展開";
+      }
+    }
+
+    // 2. Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJFJl21wOm7nGxxjkURROVQxO2eQkRxds",
+      authDomain: "revon-tw.firebaseapp.com",
+      projectId: "revon-tw",
+      storageBucket: "revon-tw.firebasestorage.app",
+      appId: "1:123655068235:android:51a57a61a8ca78977c8bce"
+    };
+
+    appendLog("正在初始化 Firebase App (projectId: revon-tw)...");
+    
+    let db;
+    if (typeof firebase === 'undefined') {
+      appendLog("❌ Firebase JS SDK 未載入（請檢查網路連線或 CDN 載入）", "error");
+      document.getElementById("dbStateVal").innerText = "SDK ERROR";
+      document.getElementById("dbStateVal").style.color = "#ff2a55";
+      document.getElementById("statusText").innerText = "❌ Firebase SDK 未載入";
+    } else {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+
+        appendLog("Firebase 初始化成功，正在開啟雙重同步監聽...", "success");
+        document.getElementById("dbStateVal").innerText = "CONNECTED";
+        document.getElementById("dbStateVal").style.color = "#00ff66";
+        
+        const statusBadge = document.getElementById("statusBadge");
+        const statusText = document.getElementById("statusText");
+        const statusDot = document.getElementById("statusDot");
+        statusText.textContent = "🟢 Firebase 已連線 (搜尋線上車手中...)";
+        statusDot.style.backgroundColor = "#00ff66";
+        statusBadge.style.borderColor = "rgba(0,255,102,0.4)";
+      } catch (e) {
+        appendLog("Firebase 初始化失敗: " + e.message, "error");
+        document.getElementById("dbStateVal").innerText = "ERROR";
+        document.getElementById("dbStateVal").style.color = "#ff2a55";
+        document.getElementById("statusText").innerText = "❌ Firebase 初始化失敗: " + e.message;
+      }
+    }
+
+    // 3. Google Maps Initialization with Modern Dark Custom Styles
+    const defaultCenter = { lat: 24.108, lng: 120.780 };
+    
+    // Custom Dark Map Styles matching Revon theme
+    const darkMapStyle = [
+      { elementType: "geometry", stylers: [{ color: "#090a0f" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#090a0f" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#8a90a2" }] },
+      {
+        featureType: "administrative.locality",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#00e5ff" }]
+      },
+      {
+        featureType: "poi",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#6b7280" }]
+      },
+      {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [{ color: "#11141d" }]
+      },
+      {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#1a1d28" }]
+      },
+      {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#252a3b" }]
+      },
+      {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#2a3045" }]
+      },
+      {
+        featureType: "road.highway",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#373e56" }]
+      },
+      {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#0d111a" }]
+      },
+      {
+        featureType: "water",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#3e4c66" }]
+      }
+    ];
+
+    const map = new google.maps.Map(document.getElementById('map'), {
+      center: defaultCenter,
+      zoom: 14,
+      styles: darkMapStyle,
+      disableDefaultUI: true,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.LEFT_BOTTOM
+      }
+    });
+
+    let activePolylines = [];
+    let driverOverlay = null;
+    let trackStartOverlay = null;
+    let trackEndOverlay = null;
+    let startCircleOverlay = null;
+    let endCircleOverlay = null;
+    let currentSessionId = null;
+    let lastAutoFitSessionId = null;
+
+    // Helper Custom Overlay Class for HTML Markers in Google Maps
+    class CustomHTMLOverlay extends google.maps.OverlayView {
+      constructor(position, htmlContent, zIndex = 100) {
+        super();
+        this.position = position;
+        this.htmlContent = htmlContent;
+        this.zIndex = zIndex;
+        this.div = null;
+      }
+
+      onAdd() {
+        this.div = document.createElement('div');
+        this.div.style.position = 'absolute';
+        this.div.style.zIndex = this.zIndex;
+        this.div.innerHTML = this.htmlContent;
+        const panes = this.getPanes();
+        panes.overlayMouseTarget.appendChild(this.div);
+      }
+
+      draw() {
+        const overlayProjection = this.getProjection();
+        if (!overlayProjection || !this.position || !this.div) return;
+        const point = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(this.position.lat, this.position.lng));
+        if (point) {
+          this.div.style.left = (point.x - (this.div.offsetWidth / 2 || 12)) + 'px';
+          this.div.style.top = (point.y - (this.div.offsetHeight / 2 || 12)) + 'px';
+        }
+      }
+
+      onRemove() {
+        if (this.div && this.div.parentNode) {
+          this.div.parentNode.removeChild(this.div);
+          this.div = null;
+        }
+      }
+
+      setPosition(position) {
+        this.position = position;
+        this.draw();
+      }
+
+      setHTML(htmlContent) {
+        this.htmlContent = htmlContent;
+        if (this.div) this.div.innerHTML = htmlContent;
+      }
+    }
+
+    // Driver GPS Marker HTML (Bright Blue Circle matching App)
+    const driverMarkerHTML = `
+      <div style="
+        width: 24px;
+        height: 24px;
+        background: #00e5ff;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #00e5ff, 0 0 40px rgba(0, 229, 255, 0.8);
+        cursor: pointer;
+      "></div>
+    `;
+
+    // Track Checkpoint Marker HTML Creator (Red Tag)
+    function createCheckpointHTML(title, color = "#ff2a55") {
+      return `
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 42, 85, 0.95);
+          color: #ffffff;
+          padding: 4px 10px;
+          border-radius: 20px;
+          border: 2px solid #ffffff;
+          font-weight: 800;
+          font-size: 11px;
+          box-shadow: 0 0 16px ${color};
+          white-space: nowrap;
+          cursor: pointer;
+        ">
+          <div style="width: 8px; height: 8px; background: #fff; border-radius: 50%;"></div>
+          <span>${title}</span>
+        </div>
+      `;
+    }
+
+    function getSpeedColor(spd) {
+      if (spd >= 100) return '#ff2a55'; // Red (>100 km/h)
+      if (spd >= 70)  return '#ffb800'; // Yellow (70~100 km/h)
+      if (spd >= 40)  return '#00ff66'; // Neon Green (40~70 km/h)
+      return '#00e5ff';                 // Cyan Blue (<40 km/h)
+    }
+
+    // G-Force Crosshair Canvas
+    const canvas = document.getElementById('gforceCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawGForce(accelG) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = cx - 10;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, 10); ctx.lineTo(cx, h - 10);
+      ctx.moveTo(10, cy); ctx.lineTo(w - 10, cy);
+      ctx.stroke();
+
+      const clamped = Math.max(-2.0, Math.min(2.0, accelG));
+      const py = cy - (clamped / 2.0) * r;
+
+      ctx.fillStyle = '#ff2a55';
+      ctx.beginPath();
+      ctx.arc(cx, py, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = '#ff2a55';
+      ctx.shadowBlur = 10;
+    }
+
+    drawGForce(0);
+
+    function formatTime(ms) {
+      if (!ms || ms <= 0) return "00:00.000";
+      const seconds = Math.floor(ms / 1000) % 60;
+      const minutes = Math.floor(ms / (1000 * 60)) % 60;
+      const millis = ms % 1000;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
+    }
+
+    function getMs(val) {
+      if (!val) return 0;
+      if (typeof val === 'number') return val;
+      if (typeof val.toMillis === 'function') return val.toMillis();
+      if (typeof val.seconds === 'number') return val.seconds * 1000;
+      if (typeof val === 'string') return new Date(val).getTime() || 0;
+      return 0;
+    }
+
+    let currentTelemetryData = null;
+    let lastTelemetryServerMs = 0;
+    let lastTelemetryReceiveTime = 0;
+
+    // High-frequency (60fps) smooth stopwatch timer loop for web spectator dashboard
+    function updateHighFreqTimerLoop() {
+      if (currentTelemetryData && currentTelemetryData.isRacing) {
+        const elapsedSinceReceive = Date.now() - lastTelemetryReceiveTime;
+        const liveMs = lastTelemetryServerMs + elapsedSinceReceive;
+        document.getElementById("timerDisplay").textContent = formatTime(liveMs);
+      }
+      requestAnimationFrame(updateHighFreqTimerLoop);
+    }
+    requestAnimationFrame(updateHighFreqTimerLoop);
+
+    // 4. Render Telemetry Data to UI
+    function renderDriverTelemetry(data) {
+      if (!data) return;
+      currentTelemetryData = data;
+      document.getElementById("driverName").textContent = data.driverNickname || "車手";
+      document.getElementById("trackName").textContent = `${data.trackName || data.trackCode || '賽道'} · 賽道即時號誌`;
+      document.getElementById("vehicleType").textContent = data.vehicleType || "CAR";
+      document.getElementById("speedDisplay").textContent = Math.round(data.speedKmh || 0);
+      document.getElementById("accelGVal").textContent = (data.accelG || 0).toFixed(2) + " G";
+      document.getElementById("pointsCountVal").textContent = data.pointsCount || (data.recentPoints ? data.recentPoints.length : 0);
+      
+      const currentLapMs = data.currentLapMs !== undefined ? data.currentLapMs : data.elapsedMs;
+      lastTelemetryServerMs = currentLapMs || 0;
+      lastTelemetryReceiveTime = Date.now();
+      if (!data.isRacing) {
+        document.getElementById("timerDisplay").textContent = formatTime(currentLapMs || 0);
+      }
+      document.getElementById("lapBadge").textContent = `LAP ${data.lapNumber || 1}`;
+
+      // Render Top-Left Completed Laps List
+      const lapPanel = document.getElementById("lapHistoryPanel");
+      const lapList = document.getElementById("lapHistoryList");
+      const lapTag = document.getElementById("lapCountTag");
+
+      if (data.completedLaps && Array.isArray(data.completedLaps) && data.completedLaps.length > 0) {
+        lapPanel.style.display = "flex";
+        lapTag.textContent = `${data.completedLaps.length} LAPS`;
+
+        const minLapTime = Math.min(...data.completedLaps.map(l => l.lapTimeMs || 99999999));
+        let html = '';
+        data.completedLaps.forEach((lap) => {
+          const isBest = (lap.lapTimeMs === minLapTime);
+          const displayStr = lap.lapTimeDisplay || formatTime(lap.lapTimeMs);
+          html += `
+            <div class="lap-row ${isBest ? 'best-lap' : ''}">
+              <span class="lap-num">LAP ${lap.lapNumber || 1}</span>
+              <div>
+                <span class="lap-time">${displayStr}</span>
+                ${isBest ? '<span class="best-badge">🏆 BEST</span>' : ''}
+              </div>
+            </div>
+          `;
+        });
+        lapList.innerHTML = html;
+      } else {
+        lapPanel.style.display = "none";
+      }
+
+      // Render Status Badge & Banner
+      const statusBadge = document.getElementById("statusBadge");
+      const statusText = document.getElementById("statusText");
+      const statusDot = document.getElementById("statusDot");
+
+      let raceStatusLabel = "🔴 LIVE 競速中";
+      let statusColor = "#ff2a55";
+      if (!data.isRacing) {
+        if (data.status === "PREPARING" || (!data.status && !data.stopReason)) {
+          raceStatusLabel = "🟡 正在準備 (等待過線)";
+          statusColor = "#ffb800";
+        } else if (data.status === "FINISHED" || data.stopReason === "RACE_COMPLETED") {
+          raceStatusLabel = "🏁 競速已完賽 (FINISHED)";
+          statusColor = "#00ff66";
+        } else if (data.status === "ABORTED" || data.stopReason === "MANUAL_STOP") {
+          raceStatusLabel = "🛑 競速已手動結束 (ABORTED)";
+          statusColor = "#ffb800";
+        } else if (data.stopReason === "UNEXPECTED_EXIT") {
+          raceStatusLabel = "⚠️ App 意外中斷/退出 (EXITED)";
+          statusColor = "#ffb800";
+        } else {
+          raceStatusLabel = "🟡 正在準備";
+          statusColor = "#ffb800";
+        }
+      }
+
+      if (statusText) statusText.textContent = `🟢 Firebase 連線中 · ${data.driverNickname || '車手'} [${raceStatusLabel}]`;
+      if (statusDot) statusDot.style.backgroundColor = statusColor;
+      if (statusBadge) statusBadge.style.borderColor = statusColor;
+
+      const updatedMs = getMs(data.updatedAt);
+      const updatedDate = updatedMs ? new Date(updatedMs) : new Date();
+      document.getElementById("lastUpdatedVal").textContent = updatedDate.toLocaleTimeString() + (data.isRacing ? "" : ` (${raceStatusLabel})`);
+
+      drawGForce(data.accelG || 0);
+
+      // Render Red Track Start & End Checkpoint Markers & 7m Sensing Radius Circles in Google Maps
+      if (data.startLat && data.startLng && Math.abs(data.startLat) > 0.01) {
+        const startPos = { lat: data.startLat, lng: data.startLng };
+        if (!trackStartOverlay) {
+          trackStartOverlay = new CustomHTMLOverlay(startPos, createCheckpointHTML("🚩 起點 S", "#00ff66"), 800);
+          trackStartOverlay.setMap(map);
+        } else {
+          trackStartOverlay.setPosition(startPos);
+        }
+
+        if (!startCircleOverlay) {
+          startCircleOverlay = new google.maps.Circle({
+            strokeColor: "#00ff66",
+            strokeOpacity: 0.9,
+            strokeWeight: 2,
+            fillColor: "#00ff66",
+            fillOpacity: 0.2,
+            map: map,
+            center: startPos,
+            radius: 7.0
+          });
+        } else {
+          startCircleOverlay.setCenter(startPos);
+        }
+      }
+
+      if (data.endLat && data.endLng && Math.abs(data.endLat) > 0.01) {
+        const endPos = { lat: data.endLat, lng: data.endLng };
+        if (!trackEndOverlay) {
+          trackEndOverlay = new CustomHTMLOverlay(endPos, createCheckpointHTML("🏁 終點 E", "#ff2a55"), 800);
+          trackEndOverlay.setMap(map);
+        } else {
+          trackEndOverlay.setPosition(endPos);
+        }
+
+        if (!endCircleOverlay) {
+          endCircleOverlay = new google.maps.Circle({
+            strokeColor: "#ff2a55",
+            strokeOpacity: 0.9,
+            strokeWeight: 2,
+            fillColor: "#ff2a55",
+            fillOpacity: 0.2,
+            map: map,
+            center: endPos,
+            radius: 7.0
+          });
+        } else {
+          endCircleOverlay.setCenter(endPos);
+        }
+      }
+
+      // Extract latitude & longitude (check direct fields or last recent point)
+      let lat = data.latitude;
+      let lng = data.longitude;
+      if ((!lat || !lng) && data.recentPoints && data.recentPoints.length > 0) {
+        const lastPt = data.recentPoints[data.recentPoints.length - 1];
+        lat = lastPt.lt || lastPt.latitude || lastPt.lat;
+        lng = lastPt.lg || lastPt.longitude || lastPt.lng;
+      }
+
+      if (lat && lng && Math.abs(lat) > 0.01 && Math.abs(lng) > 0.01) {
+        const pos = { lat: lat, lng: lng };
+        
+        if (!driverOverlay) {
+          driverOverlay = new CustomHTMLOverlay(pos, driverMarkerHTML, 1000);
+          driverOverlay.setMap(map);
+          map.setCenter(pos);
+          map.setZoom(16);
+        } else {
+          driverOverlay.setPosition(pos);
+          map.panTo(pos);
+        }
+
+        // Clear Old Polylines
+        activePolylines.forEach(p => p.setMap(null));
+        activePolylines = [];
+
+        // Speed Color Spectrum Trajectory Rendering for Current LAP Only (載入該車手已跑過的所有點位與持續動態繪製)
+        if (data.recentPoints && Array.isArray(data.recentPoints) && data.recentPoints.length >= 2) {
+          const pts = data.recentPoints;
+          const bounds = new google.maps.LatLngBounds();
+
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const lat1 = p1.lt !== undefined ? p1.lt : (p1.latitude !== undefined ? p1.latitude : p1.lat);
+            const lng1 = p1.lg !== undefined ? p1.lg : (p1.longitude !== undefined ? p1.longitude : p1.lng);
+            const lat2 = p2.lt !== undefined ? p2.lt : (p2.latitude !== undefined ? p2.latitude : p2.lat);
+            const lng2 = p2.lg !== undefined ? p2.lg : (p2.longitude !== undefined ? p2.longitude : p2.lng);
+
+            if (lat1 && lng1 && lat2 && lng2 && Math.abs(lat1) > 0.01 && Math.abs(lat2) > 0.01) {
+              const pt1 = { lat: lat1, lng: lng1 };
+              const pt2 = { lat: lat2, lng: lng2 };
+              bounds.extend(pt1);
+              bounds.extend(pt2);
+
+              const avgSpd = ((p1.s || p1.speedKmh || 0) + (p2.s || p2.speedKmh || 0)) / 2;
+              const segColor = getSpeedColor(avgSpd);
+              
+              const polyline = new google.maps.Polyline({
+                path: [pt1, pt2],
+                geodesic: true,
+                strokeColor: segColor,
+                strokeOpacity: 0.9,
+                strokeWeight: 5
+              });
+              polyline.setMap(map);
+              activePolylines.push(polyline);
+            }
+          }
+
+          // 如果是剛選入該車手，自動調整地圖視野至涵蓋已行駛全航跡
+          if (currentSessionId !== lastAutoFitSessionId) {
+            map.fitBounds(bounds);
+            lastAutoFitSessionId = currentSessionId;
+          }
+        }
+      }
+    }
+
+    // 5. Process Active Sessions Document List & Broadcast Driver Lifecycle Events
+    const knownSessionMap = new Map();
+
+    function processActiveSessions(docs) {
+      const activeSessions = [];
+      const now = Date.now();
+      const tenMinutesMs = 10 * 60 * 1000;
+      const currentSeenIds = new Set();
+
+      docs.forEach((doc) => {
+        const data = typeof doc.data === 'function' ? doc.data() : doc;
+        const id = doc.id || (data ? data.sessionId : null);
+        if (id && data) {
+          currentSeenIds.add(id);
+          const updatedMs = getMs(data.updatedAt);
+          
+          if (updatedMs && (now - updatedMs > tenMinutesMs)) {
+            // 自動從 Firestore 徹底清理逾時 10 分鐘以上的舊紀錄
+            if (db) {
+              db.collection("live_telemetry").doc(id).delete().then(() => {
+                appendLog(`🧹 自動清理逾時 10 分鐘廢棄廣播: ${id}`, "info");
+              }).catch(() => {});
+            }
+          } else {
+            activeSessions.push({ id: id, ...data });
+
+            // 📢 在左下角偵錯日誌視窗中印出車手連線/狀態生命週期變化 log
+            const prev = knownSessionMap.get(id);
+            const nickname = data.driverNickname || "車手";
+            const trackStr = data.trackName || data.trackCode || "賽道";
+
+            if (!prev) {
+              appendLog(`🏎️ 發現新車手線上連線: ${nickname} (${trackStr}) - 準備進入賽道`, "info");
+            } else {
+              if (!prev.isRacing && data.isRacing) {
+                appendLog(`🟢 競速開始: 車手 ${nickname} 已跨越起點開始計時！`, "success");
+              } else if (prev.isRacing && !data.isRacing) {
+                let endMsg = "競速已停止";
+                if (data.status === "FINISHED" || data.stopReason === "RACE_COMPLETED") endMsg = "順利完賽 🏁";
+                else if (data.status === "ABORTED" || data.stopReason === "MANUAL_STOP") endMsg = "手動終止 🛑";
+                else if (data.stopReason === "UNEXPECTED_EXIT") endMsg = "意外中斷/退出 ⚠️";
+                appendLog(`🏁 競速結束: 車手 ${nickname} [${endMsg}]`, "info");
+              }
+            }
+            knownSessionMap.set(id, { isRacing: data.isRacing, status: data.status, stopReason: data.stopReason, updatedAt: data.updatedAt });
+          }
+        }
+      });
+
+      activeSessions.sort((a, b) => getMs(b.updatedAt) - getMs(a.updatedAt));
+
+      const activeCountVal = document.getElementById("activeCountVal");
+      if (activeCountVal) activeCountVal.innerText = `${activeSessions.length} 筆賽車`;
+
+      const statusBadge = document.getElementById("statusBadge");
+      const statusText = document.getElementById("statusText");
+      const statusDot = document.getElementById("statusDot");
+
+      if (activeSessions.length > 0) {
+        if (statusText) statusText.textContent = `🟢 Firebase 連線正常 · ${activeSessions.length} 車手競速中`;
+        if (statusDot) statusDot.style.backgroundColor = "#00ff66";
+        if (statusBadge) statusBadge.style.borderColor = "rgba(0,255,102,0.4)";
+      } else {
+        if (statusText) statusText.textContent = "🟡 Firebase 連線正常 (現無活躍賽車廣播)";
+        if (statusDot) statusDot.style.backgroundColor = "#ffb800";
+        if (statusBadge) statusBadge.style.borderColor = "rgba(255,184,0,0.4)";
+      }
+
+      const select = document.getElementById("sessionSelector");
+      const currentSelectedVal = select.value || currentSessionId;
+
+      let html = '<option value="">-- 請選擇即時連線賽車 --</option>';
+      activeSessions.forEach((sess) => {
+        const updatedMs = getMs(sess.updatedAt);
+        const diffSec = Math.max(0, Math.floor((now - updatedMs) / 1000));
+        let timeTag = "剛剛";
+        if (diffSec > 60) {
+          timeTag = `${Math.floor(diffSec / 60)}分鐘前`;
+        } else if (diffSec > 0) {
+          timeTag = `${diffSec}秒前`;
+        }
+        let statusTag = '🔴 LIVE 競速中';
+        if (!sess.isRacing) {
+          if (sess.status === "PREPARING" || (!sess.status && !sess.stopReason)) statusTag = '🟡 正在準備';
+          else if (sess.status === "FINISHED" || sess.stopReason === "RACE_COMPLETED") statusTag = '🏁 已完賽';
+          else if (sess.status === "ABORTED" || sess.stopReason === "MANUAL_STOP") statusTag = '🛑 已手動結束';
+          else if (sess.stopReason === "UNEXPECTED_EXIT") statusTag = '⚠️ 意外退出';
+          else statusTag = '🟡 正在準備';
+        }
+        html += `<option value="${sess.id}">🏎️ ${sess.driverNickname || '車手'} (${sess.trackName || sess.trackCode || '賽道'}) - ${statusTag} [${timeTag}]</option>`;
+      });
+      select.innerHTML = html;
+
+      // 自動選入新車手邏輯：
+      // 1. 若當前已有選中的有效 Session，且該紀錄尚未結束，則繼續保持選中。
+      // 2. 否則，僅當發現「全新線上連線 (isRacing === true 或 status === 'PREPARING')」的新車手時，才自動選入並載入畫面。
+      // 3. 已手動結束 (ABORTED/MANUAL_STOP) 或 已完賽 (FINISHED/RACE_COMPLETED) 的舊紀錄切勿自動選入！
+      const isCurrentValidAndActive = currentSelectedVal && activeSessions.some(s => {
+        if (s.id !== currentSelectedVal) return false;
+        return s.isRacing === true || s.status === "PREPARING" || (!s.status && !s.stopReason);
+      });
+
+      const newlyDiscoveredActiveSession = activeSessions.find(s => {
+        const isEnded = s.status === "ABORTED" || s.status === "FINISHED" || s.stopReason === "MANUAL_STOP" || s.stopReason === "RACE_COMPLETED" || s.stopReason === "UNEXPECTED_EXIT";
+        return !isEnded && (s.isRacing === true || s.status === "PREPARING" || (!s.status && !s.stopReason));
+      });
+
+      if (isCurrentValidAndActive) {
+        select.value = currentSelectedVal;
+        currentSessionId = currentSelectedVal;
+        const selSess = activeSessions.find(s => s.id === currentSelectedVal);
+        if (selSess) renderDriverTelemetry(selSess);
+      } else if (currentSelectedVal && activeSessions.some(s => s.id === currentSelectedVal)) {
+        // 使用者目前手動切換選中的是已結束紀錄，保持使用者選擇不強制覆蓋
+        select.value = currentSelectedVal;
+        currentSessionId = currentSelectedVal;
+        const selSess = activeSessions.find(s => s.id === currentSelectedVal);
+        if (selSess) renderDriverTelemetry(selSess);
+      } else if (newlyDiscoveredActiveSession) {
+        select.value = newlyDiscoveredActiveSession.id;
+        currentSessionId = newlyDiscoveredActiveSession.id;
+        renderDriverTelemetry(newlyDiscoveredActiveSession);
+        appendLog(`📡 發現新車手連線，自動選入並顯示: ${newlyDiscoveredActiveSession.driverNickname || '車手'} (${newlyDiscoveredActiveSession.trackName || newlyDiscoveredActiveSession.trackCode || '賽道'})`, "success");
+      } else {
+        currentSessionId = null;
+        select.value = "";
+      }
+    }
+
+    // 6. Firestore Real-time Listener + High-frequency Polling Fallback (Smart Hybrid Sync)
+    if (db) {
+      db.collection("live_telemetry").onSnapshot((snapshot) => {
+        if (snapshot && snapshot.docs) {
+          processActiveSessions(snapshot.docs);
+        }
+      }, (err) => {
+        appendLog("Snapshot 監聽提示: " + err.message, "info");
+      });
+    }
+
+    // High-frequency polling backup (every 1000ms for file:/// protocol compatibility)
+    let isPolling = false;
+    async function syncLoop() {
+      if (!db || isPolling) return;
+      isPolling = true;
+      try {
+        const snapshot = await db.collection("live_telemetry").get();
+        if (snapshot && snapshot.docs) {
+          processActiveSessions(snapshot.docs);
+        }
+        if (currentSessionId) {
+          const doc = await db.collection("live_telemetry").doc(currentSessionId).get();
+          if (doc.exists) {
+            renderDriverTelemetry(doc.data());
+          }
+        }
+      } catch (e) {
+        appendLog("輪詢刷新提示: " + e.message, "info");
+      } finally {
+        isPolling = false;
+      }
+    }
+
+    setInterval(syncLoop, 1000);
+    syncLoop();
+
+    document.getElementById("sessionSelector").addEventListener("change", (e) => {
+      const sid = e.target.value;
+      if (sid) {
+        currentSessionId = sid;
+        db.collection("live_telemetry").doc(sid).get().then(doc => {
+          if (doc.exists) renderDriverTelemetry(doc.data());
+        });
+      }
+    });
+
+    // 7. Test Firebase Connection Diagnostics directly
+    function testFirebaseConnection() {
+      appendLog("🔍 手動發起 Firebase 讀寫連線測試...", "info");
+      const startTime = Date.now();
+      if (!db) {
+        appendLog("❌ Firebase DB 物件未建立！", "error");
+        return;
+      }
+
+      db.collection("live_telemetry").get().then((querySnapshot) => {
+        const elapsed = Date.now() - startTime;
+        appendLog(`✅ Firebase 讀取成功！耗時 ${elapsed}ms (獲取 ${querySnapshot.size} 筆紀錄)`, "success");
+        processActiveSessions(querySnapshot.docs);
+      }).catch((err) => {
+        appendLog("❌ Firebase 測試讀取失敗: " + err.message, "error");
+      });
+    }
+
+    // 8. Test Runner: Inject Simulated Race Data directly from Web Browser
+    let simInterval = null;
+    function runSimulatedRace() {
+      const simBtn = document.getElementById("simBtn");
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+        if (simBtn) {
+          simBtn.textContent = "🧪 測試模擬傳送";
+          simBtn.style.borderColor = "rgba(0, 229, 255, 0.4)";
+          simBtn.style.color = "var(--cyan-accent)";
+        }
+        if (db) {
+          db.collection("live_telemetry").doc("sim_test_driver").update({
+            isRacing: false,
+            status: "FINISHED",
+            stopReason: "MANUAL_STOP",
+            updatedAt: Date.now()
+          }).then(() => {
+            appendLog("⏹️ 已停止網頁模擬傳送 (標記: FINISHED)", "info");
+          }).catch(() => {});
+        }
+        return;
+      }
+
+      if (simBtn) {
+        simBtn.textContent = "🛑 停止模擬傳送";
+        simBtn.style.borderColor = "rgba(255, 42, 85, 0.8)";
+        simBtn.style.color = "var(--red-primary)";
+      }
+
+      appendLog("🧪 開始發送模擬 App 賽車數據至 Firebase (車手: 模擬試駕車手)...", "success");
+      let count = 0;
+      const baseLat = 24.108;
+      const baseLng = 120.780;
+      const ptsHistory = [];
+      let simLapNumber = 1;
+      let simLapStartMs = Date.now();
+      const simCompletedLaps = [];
+
+      simInterval = setInterval(() => {
+        count++;
+        const curLat = baseLat + 0.0001 * count;
+        const curLng = baseLng + 0.00015 * Math.sin(count * 0.2);
+        const spd = Math.round(60 + 35 * Math.sin(count * 0.3));
+        const g = (0.8 * Math.cos(count * 0.3)).toFixed(2);
+        const elapsed = count * 500;
+
+        const nowMs = Date.now();
+        const simCurrentLapMs = nowMs - simLapStartMs;
+
+        // Auto complete lap every 30 ticks (15s) in sim mode
+        if (count > 0 && count % 30 === 0) {
+          simCompletedLaps.push({
+            lapNumber: simLapNumber,
+            lapTimeMs: simCurrentLapMs,
+            lapTimeDisplay: formatTime(simCurrentLapMs)
+          });
+          simLapNumber++;
+          simLapStartMs = Date.now();
+        }
+
+        ptsHistory.push({ lt: curLat, lg: curLng, s: spd, g: parseFloat(g) });
+
+        if (db) {
+          db.collection("live_telemetry").doc("sim_test_driver").set({
+            sessionId: "sim_test_driver",
+            driverNickname: "模擬試駕車手 (Web)",
+            trackCode: "136",
+            trackName: "136 Pass 經典山道",
+            vehicleType: "CAR",
+            latitude: curLat,
+            longitude: curLng,
+            speedKmh: spd,
+            accelG: parseFloat(g),
+            elapsedMs: elapsed,
+            currentLapMs: simCurrentLapMs,
+            lapNumber: simLapNumber,
+            completedLaps: simCompletedLaps,
+            isRacing: true,
+            status: "RACING",
+            pointsCount: ptsHistory.length,
+            recentPoints: ptsHistory.slice(-500),
+            startLat: baseLat,
+            startLng: baseLng,
+            endLat: baseLat + 0.005,
+            endLng: baseLng + 0.005,
+            updatedAt: Date.now()
+          });
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>

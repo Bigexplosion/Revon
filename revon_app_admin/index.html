@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REV-ON Admin Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Maps JavaScript API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcIlEGGp-DDakBjGE6ODOK_eNwOZK40mU&v=weekly"></script>
+    <!-- Leaflet CSS & JS for Telemetry Heatmap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fa-solid fa-gauge-high text-danger"></i> REV-ON ADMIN</h3>
+        </div>
+        <div class="sidebar-scroll">
+
+            <!-- 分類 1: 總覽 -->
+            <div class="sidebar-category">
+                <div class="sidebar-cat-label">總覽</div>
+                <ul class="list-unstyled components">
+                    <li class="active" data-view="dashboard">
+                        <a href="#"><i class="fa-solid fa-chart-line"></i> 控制面板</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 分類 2: 玩家管理 -->
+            <div class="sidebar-category">
+                <div class="sidebar-cat-label">玩家管理</div>
+                <ul class="list-unstyled components">
+                    <li data-view="users">
+                        <a href="#"><i class="fa-solid fa-users"></i> 玩家管理</a>
+                    </li>
+                    <li data-view="monitor">
+                        <a href="#"><i class="fa-solid fa-desktop"></i> 即時儀表版</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 分類 3: 賽道 & 成績 -->
+            <div class="sidebar-category">
+                <div class="sidebar-cat-label">賽道 & 成績</div>
+                <ul class="list-unstyled components">
+                    <li data-view="tracks">
+                        <a href="#"><i class="fa-solid fa-map-location-dot"></i> 賽道管理</a>
+                    </li>
+                    <li data-view="records">
+                        <a href="#"><i class="fa-solid fa-stopwatch"></i> 成績管理</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 分類 4: 社群 -->
+            <div class="sidebar-category">
+                <div class="sidebar-cat-label">社群</div>
+                <ul class="list-unstyled components">
+                    <li data-view="clubs">
+                        <a href="#"><i class="fa-solid fa-users-viewfinder"></i> 車隊管理</a>
+                    </li>
+                    <li data-view="reports">
+                        <a href="#"><i class="fa-solid fa-headset"></i> 客服問題回報</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 分類 5: 營運工具 -->
+            <div class="sidebar-category">
+                <div class="sidebar-cat-label">營運工具</div>
+                <ul class="list-unstyled components">
+                    <li data-view="content_mgr">
+                        <a href="#"><i class="fa-solid fa-rectangle-ad"></i> 內容營運管理</a>
+                    </li>
+                    <li data-view="region_story">
+                        <a href="#"><i class="fa-solid fa-fire"></i> 熱度與圖卡產生器</a>
+                    </li>
+                    <li data-view="snapshots">
+                        <a href="#"><i class="fa-solid fa-camera"></i> 強制排名快照</a>
+                    </li>
+                    <li data-view="coupons">
+                        <a href="#"><i class="fa-solid fa-ticket"></i> 優惠碼管理</a>
+                    </li>
+                    <li data-view="system_logs">
+                        <a href="#"><i class="fa-solid fa-bug"></i> 系統錯誤 Log 監控</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="btn btn-outline-danger w-100"><i class="fa-solid fa-arrow-right-from-bracket"></i> 登出系統</button>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark topbar">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-dark">
+                    <i class="fas fa-align-left"></i>
+                </button>
+                <div class="d-flex ms-auto align-items-center gap-3">
+                    <span class="live-indicator"><span class="live-pulse me-1"></span><small class="text-success fw-bold">LIVE</small></span>
+                    <span class="text-light" id="adminName">Admin User</span>
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" class="rounded-circle" width="36" height="36" alt="Admin">
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main View Area -->
+        <main class="container-fluid p-4" id="main-view">
+
+            <!-- Dashboard: Multi-panel concurrent view -->
+            <div id="view-dashboard" class="view-section active">
+                <div class="section-title">🏎 REV-ON 後台控制中樞 (OVERVIEW)</div>
+
+                <!-- Top Stats Row -->
+                <div class="stats row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-users">--</div>
+                            <div class="stat-label">總會員數</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-active" style="color: #4caf50;">--</div>
+                            <div class="stat-label">今日活躍</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-pending-tracks" style="color: #ff9800;">--</div>
+                            <div class="stat-label">待審賽道</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-reports" style="color: #ff5555;">--</div>
+                            <div class="stat-label">異常舉報</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Multi-Panel Row -->
+                <div class="row g-4">
+                    <!-- Panel 1: 玩家快速管理 -->
+                    <div class="col-12 col-xl-4">
+                        <div class="panel-card h-100">
+                            <div class="panel-header">
+                                <i class="fa-solid fa-users text-danger me-2"></i>玩家快速管理
+                                <button class="btn btn-sm btn-outline-danger ms-auto" onclick="loadViewById('users')">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> 完整管理
+                                </button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="dash-user-search" class="form-control bg-dark text-light border-secondary" placeholder="搜尋玩家暱稱或帳號...">
+                                    <button class="btn btn-danger" onclick="dashSearchUsers()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                </div>
+                                <div id="dash-users-list" class="dash-scroll-list">
+                                    <div class="text-center text-muted py-3">輸入關鍵字搜尋玩家</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: 即時競速儀表 (mini) -->
+                    <div class="col-12 col-xl-4">
+                        <div class="panel-card h-100">
+                            <div class="panel-header">
+                                <span class="live-pulse me-2"></span>
+                                <i class="fa-solid fa-flag-checkered text-success me-2"></i>即時競速儀表
+                                <button class="btn btn-sm btn-outline-success ms-auto" onclick="loadViewById('monitor')">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> 完整監控
+                                </button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-4 text-center">
+                                        <div class="mini-stat-num text-success" id="dash-racing-count">--</div>
+                                        <div class="mini-stat-label">比賽中</div>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <div class="mini-stat-num text-info" id="dash-sessions-count">--</div>
+                                        <div class="mini-stat-label">今日場次</div>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <div class="mini-stat-num text-warning" id="dash-finished-count">--</div>
+                                        <div class="mini-stat-label">今日完成</div>
+                                    </div>
+                                </div>
+                                <div id="dash-monitor-list" class="dash-scroll-list">
+                                    <div class="text-center text-muted py-3">載入中...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 3: 系統快捷操作 -->
+                    <div class="col-12 col-xl-4">
+                        <div class="panel-card h-100">
+                            <div class="panel-header">
+                                <i class="fa-solid fa-bolt text-warning me-2"></i>系統快捷操作
+                            </div>
+                            <div class="panel-body">
+                                <div class="quick-actions-grid">
+                                    <button class="quick-action-btn" onclick="loadViewById('tracks')">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                        <span>賽道管理</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('records')">
+                                        <i class="fa-solid fa-stopwatch"></i>
+                                        <span>成績管理</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('clubs')">
+                                        <i class="fa-solid fa-users-viewfinder"></i>
+                                        <span>車隊管理</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('content_mgr')">
+                                        <i class="fa-solid fa-rectangle-ad"></i>
+                                        <span>內容管理</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('coupons')">
+                                        <i class="fa-solid fa-ticket"></i>
+                                        <span>優惠碼</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('snapshots')">
+                                        <i class="fa-solid fa-camera"></i>
+                                        <span>強制快照</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('reports')">
+                                        <i class="fa-solid fa-headset"></i>
+                                        <span>客服回報</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="loadViewById('region_story')">
+                                        <i class="fa-solid fa-fire"></i>
+                                        <span>熱度圖卡</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty shells for other views, generated via JS -->
+            <div id="view-users" class="view-section d-none"></div>
+            <div id="view-tracks" class="view-section d-none"></div>
+            <div id="view-records" class="view-section d-none"></div>
+            <div id="view-content_mgr" class="view-section d-none"></div>
+            <div id="view-reports" class="view-section d-none"></div>
+            <div id="view-monitor" class="view-section d-none"></div>
+            <div id="view-region_story" class="view-section d-none"></div>
+            <div id="view-snapshots" class="view-section d-none"></div>
+            <div id="view-coupons" class="view-section d-none"></div>
+            <div id="view-clubs" class="view-section d-none"></div>
+            <div id="view-system_logs" class="view-section d-none"></div>
+
+        </main>
+    </div>
+
+    <!-- Login Modal Overlay -->
+    <div id="loginOverlay" class="login-overlay d-flex align-items-center justify-content-center">
+        <div class="card bg-dark text-light p-4 shadow-lg border-danger" style="width: 400px;">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-gauge-high text-danger fa-3x mb-3"></i>
+                <h3>REV-ON 後台登入</h3>
+            </div>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">管理者帳號</label>
+                    <input type="text" class="form-control bg-dark text-light" id="loginAccount" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">密碼</label>
+                    <input type="password" class="form-control bg-dark text-light" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-danger w-100 fw-bold">登入系統</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Telemetry Replay Modal -->
+    <div class="modal fade" id="telemetryPreviewModal" tabindex="-1" aria-labelledby="telemetryPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary py-2">
+                    <h5 class="modal-title d-flex align-items-center gap-2" id="telemetryPreviewModalLabel">
+                        <i class="fa-solid fa-map-location-dot text-danger"></i>
+                        <span>成績 Log 動態回顧與動態軌跡</span>
+                        <span id="telemetryRecordIdBadge" class="badge bg-secondary">#0</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="row g-3">
+                        <!-- Left side: Leaflet Map & Scrubber Controls -->
+                        <div class="col-lg-8">
+                            <div class="position-relative border border-secondary rounded overflow-hidden shadow" style="height: 480px; background-color: #111;">
+                                <div id="telemetryMap" style="width: 100%; height: 100%;"></div>
+                                <!-- HUD Overlay on Map Top-Right -->
+                                <div class="position-absolute top-0 end-0 m-3 p-2 rounded text-end shadow" style="background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 1000; min-width: 160px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div class="text-secondary small text-uppercase font-monospace">Current Speed</div>
+                                    <div class="d-flex align-items-baseline justify-content-end gap-1">
+                                        <span id="telemetryCurSpeed" class="h2 mb-0 font-monospace text-warning fw-bold">0.0</span>
+                                        <span class="small text-muted">km/h</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 4px; background: rgba(255,255,255,0.1);">
+                                        <div id="telemetrySpeedBar" class="progress-bar bg-warning" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Telemetry Playback Control Bar -->
+                            <div class="mt-3 p-3 bg-body-tertiary rounded border border-secondary">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span id="telemetryCurrentTime" class="font-monospace text-warning fw-bold">00:00.00</span>
+                                    <input type="range" class="form-range flex-grow-1" id="telemetryScrubber" min="0" max="100" value="0" step="0.1" oninput="onTelemetryScrub(this.value)">
+                                    <span id="telemetryTotalTime" class="font-monospace text-muted">00:00.00</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button id="btnTelemetryPlay" class="btn btn-danger btn-sm px-3" onclick="toggleTelemetryPlayback()">
+                                            <i class="fa-solid fa-play me-1"></i> 播放
+                                        </button>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-secondary" onclick="setTelemetrySpeed(1)">1x</button>
+                                            <button class="btn btn-outline-secondary" onclick="setTelemetrySpeed(2)">2x</button>
+                                            <button class="btn btn-outline-secondary" onclick="setTelemetrySpeed(4)">4x</button>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-muted small">
+                                        <span class="d-flex align-items-center gap-1"><span style="display:inline-block;width:12px;height:12px;background:#3b82f6;border-radius:2px;"></span> 慢</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="display:inline-block;width:12px;height:12px;background:#10b981;border-radius:2px;"></span> 中</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="display:inline-block;width:12px;height:12px;background:#ef4444;border-radius:2px;"></span> 極速</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right side: Realtime Stats Telemetry & JSON View -->
+                        <div class="col-lg-4 d-flex flex-column gap-3">
+                            <!-- Telemetry Telemetry Gauges Card -->
+                            <div class="card bg-body-tertiary border-secondary text-light">
+                                <div class="card-header border-secondary bg-transparent fw-bold d-flex justify-content-between align-items-center">
+                                    <span><i class="fa-solid fa-gauge text-info me-1"></i> 即時動態數據</span>
+                                    <span id="telemetrySampleCount" class="badge bg-secondary font-monospace">0 點</span>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-2 text-center">
+                                        <div class="col-6">
+                                            <div class="p-2 border border-secondary rounded bg-dark">
+                                                <div class="text-secondary small">最高車速</div>
+                                                <div class="h4 mb-0 font-monospace text-danger" id="telemetryMaxSpeed">0 km/h</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 border border-secondary rounded bg-dark">
+                                                <div class="text-secondary small">平均車速</div>
+                                                <div class="h4 mb-0 font-monospace text-info" id="telemetryAvgSpeed">0 km/h</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 border border-secondary rounded bg-dark">
+                                                <div class="text-secondary small">極限傾角 (L / R)</div>
+                                                <div class="h5 mb-0 font-monospace text-warning" id="telemetryLeanStats">0° / 0°</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 border border-secondary rounded bg-dark">
+                                                <div class="text-secondary small">最大 G 值</div>
+                                                <div class="h5 mb-0 font-monospace text-success" id="telemetryMaxG">0.00 G</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="border-secondary my-3">
+
+                                    <!-- Dynamic Instantaneous Stats -->
+                                    <div class="vstack gap-2 font-monospace small">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary"><i class="fa-solid fa-microchip me-1"></i> 即時傾角 (Lean):</span>
+                                            <span id="telemetryCurLean" class="fw-bold text-light">0.0°</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary"><i class="fa-solid fa-arrows-up-down-left-right me-1"></i> 即時 G 值 (Total):</span>
+                                            <span id="telemetryCurG" class="fw-bold text-light">0.00 G</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary"><i class="fa-solid fa-compass me-1"></i> 橫向 G (Lat) / 縱向 G (Long):</span>
+                                            <span id="telemetryCurGDetail" class="fw-bold text-muted">0.00 / 0.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- JSON Log Section -->
+                            <div class="card bg-body-tertiary border-secondary text-light flex-grow-1 d-flex flex-column">
+                                <div class="card-header border-secondary bg-transparent fw-bold d-flex justify-content-between align-items-center">
+                                    <span><i class="fa-solid fa-code text-warning me-1"></i> 原始 JSON Log</span>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-outline-light btn-sm py-0 px-2" onclick="downloadCurrentTelemetryJson()">
+                                            <i class="fa-solid fa-download"></i> 下載
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="toggleTelemetryJsonCollapse()">
+                                            <i class="fa-solid fa-chevron-down" id="telemetryJsonIcon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-2 flex-grow-1 overflow-hidden" id="telemetryJsonBody">
+                                    <pre id="telemetryJsonPre" class="bg-dark text-success p-2 rounded border border-secondary mb-0 font-monospace small overflow-auto" style="max-height: 200px; font-size: 11px; white-space: pre-wrap; word-break: break-all;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pull-Down Notification Container -->
+    <div id="revon-notify-container"></div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/api.js?v=20260911_10"></script>
+    <script src="js/app.js?v=20260911_10"></script>
+
+</body>
+</html>

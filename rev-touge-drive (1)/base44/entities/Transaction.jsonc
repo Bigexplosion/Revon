@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "points_delta": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "description",
+    "points_delta"
+  ],
+  "name": "Transaction"
+}

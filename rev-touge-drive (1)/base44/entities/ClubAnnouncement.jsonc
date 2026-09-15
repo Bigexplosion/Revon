@@ -1,0 +1,19 @@
+{
+  "name": "ClubAnnouncement",
+  "type": "object",
+  "properties": {
+    "club_id": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "captain_nickname": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "club_id",
+    "body"
+  ]
+}

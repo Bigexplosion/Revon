@@ -1,0 +1,26 @@
+{
+  "name": "ClubSeasonHistory",
+  "type": "object",
+  "properties": {
+    "club_id": {
+      "type": "string"
+    },
+    "club_name": {
+      "type": "string"
+    },
+    "season_name": {
+      "type": "string"
+    },
+    "honor": {
+      "type": "string"
+    },
+    "placement": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "club_id",
+    "season_name",
+    "honor"
+  ]
+}

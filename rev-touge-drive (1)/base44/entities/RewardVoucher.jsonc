@@ -1,0 +1,45 @@
+{
+  "name": "RewardVoucher",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "reward_id": {
+      "type": "string"
+    },
+    "reward_name": {
+      "type": "string"
+    },
+    "reward_image": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unused",
+        "redeemed"
+      ],
+      "default": "unused"
+    },
+    "redeemed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validated_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "reward_id",
+    "code"
+  ]
+}
